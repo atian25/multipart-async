@@ -1,6 +1,6 @@
-import assert from 'assert/strict';
+const assert = require('assert/strict');
 
-import { run } from '../index.js';
+const run = require('..');
 
 describe('test/index.test.js', () => {
   it('should work', async () => {
