@@ -21,27 +21,37 @@ module.exports = function parser(request, options = {}) {
   // busboy.on('close', onClose);
 
   function onField(name, value, info) {
+    const { nameTruncated, valueTruncated } = info;
+    if (nameTruncated) onLimit('fieldNameSizeLimit')(name);
+    if (valueTruncated) onLimit('fieldSizeLimit')(name);
     queue.push({ name, value, info });
   }
 
   function onFile(name, stream, info) {
     // info.truncated = stream.truncated;
+    // busboy only set truncated when consume the stream
     stream.once('limit', () => {
       info.truncated = true;
       stream.resume();
-      onLimit('fileSize')();
+      console.log('## limit', name, info);
+      onLimit('fileSizeLimit')(name);
+      // emit stream error?
+      // stream.emit('error', new Error('file size limit'));
     });
+    // in case of emit 'limit' too fast
     if (stream.truncated) {
+      console.log('## truncated');
       stream.emit('limit');
     }
     queue.push({ name, stream, info });
   }
 
   function onLimit(type) {
-    return function onLimit() {
+    return function onLimit(name) {
       const error = new Error(`Reach ${type}`);
       error.code = 'LIMIT_EXCEEDED';
       error.status = 413;
+      error.fieldname = name;
       onError(error);
     };
   }

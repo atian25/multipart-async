@@ -11,7 +11,7 @@ describe('test/index.test.js', () => {
     form.field('love', 'egg');
     form.field('by', 'node.js');
     form.field('by2', 'node.js');
-    form.file('file', __filename, 'test.js');
+    form.file('file1', __filename, 'test.js');
     form.buffer('file2', Buffer.from('abc'), 'test2.js');
     form.buffer('file3', Buffer.from('xxx'), '', 'application/octet-stream');
 
@@ -47,6 +47,7 @@ async function collect(parts) {
         content += chunk.toString();
       }
       result.files[name] = { content, ...info };
+      console.log('@@@', name, result.files[ name ])
     }
   }
   return result;
